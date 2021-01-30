@@ -1,0 +1,22 @@
+version: '3.1'
+
+services:
+
+  ghost:
+    image: ghost:latest
+    restart: always
+    ports:
+      - 4982:2368
+    environment:
+      database__client: mysql
+      database__connection__host: db
+      database__connection__user: root
+      database__connection__password: example
+      database__connection__database: ghost
+      url: http://localhost:4982
+
+  db:
+    image: mariadb:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
