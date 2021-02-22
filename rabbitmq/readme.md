@@ -1,4 +1,4 @@
-To access Rabbitmq Management, go to the following address: 
+To access **Rabbitmq Management**, go to the following address: 
 
 `http: // localhost: 15672`
 
