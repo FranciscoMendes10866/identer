@@ -1,6 +1,10 @@
 ## IDENTER 🐳
 
-### Create based on docker-compose files:
+### How to use
+
+Make sure you have the compose docker installed.
+
+### Spinning up multi-container apps using docker compose
 
 In any of the docker-compose files, to download the images and create the appropriate containers, networks, volumes, etc. Use the following command:
 
@@ -8,7 +12,7 @@ In any of the docker-compose files, to download the images and create the approp
 docker-compose up -d
 ```
 
-### Remove based on docker-compose files:
+### Roolback multi-container apps using docker compose
 
 To remove any of the docker-compose configs just use this command:
 
