@@ -12,7 +12,7 @@ In any of the docker-compose files, to download the images and create the approp
 docker-compose up -d
 ```
 
-### Roolback multi-container apps using docker compose
+### Rolling back multi-container apps using docker compose
 
 To remove any of the docker-compose configs just use this command:
 
