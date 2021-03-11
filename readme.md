@@ -10,7 +10,7 @@ docker-compose up -d
 
 ### Remove based on docker-compose files:
 
-To remove any of the docker-compose settings just use this command:
+To remove any of the docker-compose configs just use this command:
 
 ```bash
 docker-compose dowm
