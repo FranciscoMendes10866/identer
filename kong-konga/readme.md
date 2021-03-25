@@ -1,21 +1,21 @@
-# kong and konga
+To access **Konga UI**, go to the following address: 
 
-Use the latest version of kong and konga, and do not need to compile, directly pull the official image to run.
+```
+http://localhost:1337
+```
 
-Four containers:
+For the application to work, four containers will be created. The following being:
 
 * *kong-database* : postgres
 * *kong-migrations* : kong
 * *kong* : kong
 * *konga* : konga
 
-
-## Usage
+## How to use
 
 ```bash
 docker-compose up -d
 ```
-
 
 ## Configure https
 
@@ -30,9 +30,4 @@ kong:
     - KONG_SSL_CERT=/mnt/ssl/ssl.pem
     - KONG_SSL_CERT_KEY=/mnt/ssl/ssl.key
     ...
-```
-
-To use the konga UI, visit the following URL:
-```
-http://localhost:1337
 ```
