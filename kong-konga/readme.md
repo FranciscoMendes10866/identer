@@ -4,6 +4,12 @@ To access **Konga UI**, go to the following address:
 http://localhost:1337
 ```
 
+When creating a connection from **Konga** to the **Kong Admin API**, use the following url:
+
+```
+http://172.17.0.1:8001 
+```
+
 For the application to work, four containers will be created. The following being:
 
 * *kong-database* : postgres
