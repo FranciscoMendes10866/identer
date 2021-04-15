@@ -3,7 +3,7 @@ services:
   netdata:
     image: netdata/netdata:latest
     container_name: netdata
-    hostname: netdata.your-domain.com # your subdomain
+    hostname: your-domain.com # your server domain
     ports:
       - 19999:19999
     restart: unless-stopped
