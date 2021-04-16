@@ -4,7 +4,7 @@ After launching the container. Visit the following page:
 http://localhost:8080
 ```
 
-Then, on your terminal, execute the following code:
+Then, on your terminal, execute the following cmd:
 
 ```bash
 docker logs [CONTAINER ID]
