@@ -1,32 +1,111 @@
-version: '3.8'
-
-services:
-
-  postgres:
-    image: postgres:latest
-    restart: always
-    volumes:
-    - hasura_db:/var/lib/postgresql/data
-    environment:
-      POSTGRES_PASSWORD: postgrespassword
-
-  graphql-engine:
-    image: hasura/graphql-engine:latest
-    ports:
-    - "8080:8080"
-    depends_on:
-    - "postgres"
-    restart: always
-    environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
-      ## enable the console served by server
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
-      ## enable debugging mode. It is recommended to disable this in production
-      HASURA_GRAPHQL_DEV_MODE: "true"
-      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
-      ## uncomment next line to set an admin secret
-      # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+version: "3.8"
 
 volumes:
-  hasura_db:
+  postgres-data-volume:
+    name: postgres-data-volume
+  minio-data-volume:
+    name: minio-data-volume
 
+services:
+  postgres:
+    container_name: postgres
+    image: nhost/postgres:12-v0.0.3
+    ports:
+      - 5432:5432
+    expose:
+      - 5432
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    volumes:
+      - postgres-data-volume:/var/lib/postgresql/data
+    restart: always
+
+  minio:
+    container_name: minio
+    image: minio/minio:RELEASE.2022-04-01T03-41-39Z
+    restart: always
+    environment:
+      MINIO_ACCESS_KEY: 5a7bdb5f42c41e0622bf61d6e08d5537
+      MINIO_SECRET_KEY: 9e1c40c65a615a5b52f52aeeaf549944ec53acb1dff4a0bf01fb58e969f915c8
+    ports:
+      - 9000:9000
+      - 32765:32765
+    expose:
+      - 9000
+      - 32765
+    volumes:
+      - minio-data-volume:/data:rw
+    command: server --address 0.0.0.0:9000 --console-address 0.0.0.0:32765 /data
+
+  hasura:
+    container_name: hasura
+    image: hasura/graphql-engine:v2.4.0
+    links:
+      - postgres
+    restart: always
+    ports:
+      - 5000:5000
+    expose:
+      - 5000
+    environment:
+      HASURA_GRAPHQL_SERVER_PORT: 5000
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "false"
+      HASURA_GRAPHQL_ADMIN_SECRET: NIWB24maLuDT5Iqa
+      HASURA_GRAPHQL_JWT_SECRET: >-
+        {"type":"HS256", "key": "2C2FB4D61CD8C46218A83084FD49878C72FC0F2E4A8EC74C8B3CB42E1E1F4F18"}
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: public
+    command:
+      - graphql-engine
+      - serve
+  hasura_auth:
+    container_name: hasura_auth
+    image: nhost/hasura-auth
+    links:
+      - postgres
+      - hasura
+    restart: always
+    ports:
+      - "4000:4000"
+    expose:
+      - 4000
+    environment:
+      AUTH_HOST: 0.0.0.0
+      AUTH_PORT: 4000
+      AUTH_SERVER_URL: http://localhost:4000
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
+      HASURA_GRAPHQL_GRAPHQL_URL: http://hasura:5000/v1/graphql
+      HASURA_GRAPHQL_ADMIN_SECRET: NIWB24maLuDT5Iqa
+      HASURA_GRAPHQL_JWT_SECRET: >-
+        {"type":"HS256", "key": "2C2FB4D61CD8C46218A83084FD49878C72FC0F2E4A8EC74C8B3CB42E1E1F4F18"}
+      AUTH_DISABLE_NEW_USERS: "false"
+      AUTH_EMAIL_SIGNIN_EMAIL_VERIFIED_REQUIRED: "false"
+
+  hasura_storage:
+    container_name: hasura_storage
+    image: nhost/hasura-storage:0.1.5
+    restart: always
+    links:
+      - minio
+      - hasura
+      - postgres
+    ports:
+      - "8000:8000"
+    expose:
+      - 8000
+    environment:
+      DEBUG: "true"
+      HASURA_ENDPOINT: http://hasura:5000/v1
+      GRAPHQL_ENGINE_BASE_URL: http://hasura:5000
+      GRAPHQL_ENDPOINT: http://hasura:5000/v1/graphql
+      HASURA_GRAPHQL_ADMIN_SECRET: NIWB24maLuDT5Iqa
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: 5a7bdb5f42c41e0622bf61d6e08d5537
+      S3_SECRET_KEY: 9e1c40c65a615a5b52f52aeeaf549944ec53acb1dff4a0bf01fb58e969f915c8
+      S3_BUCKET: "default"
+      HASURA_METADATA: 1
+      POSTGRES_MIGRATIONS: 1
+      POSTGRES_MIGRATIONS_SOURCE: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+    command: serve
