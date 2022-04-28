@@ -3,8 +3,6 @@ version: "3.8"
 volumes:
   postgres-data-volume:
     name: postgres-data-volume
-  minio-data-volume:
-    name: minio-data-volume
 
 services:
   postgres:
@@ -26,17 +24,16 @@ services:
     image: minio/minio:RELEASE.2022-04-01T03-41-39Z
     restart: always
     environment:
-      MINIO_ACCESS_KEY: 5a7bdb5f42c41e0622bf61d6e08d5537
-      MINIO_SECRET_KEY: 9e1c40c65a615a5b52f52aeeaf549944ec53acb1dff4a0bf01fb58e969f915c8
+      MINIO_ROOT_USER: 5a7bdb5f42c41e0622bf61d6e08d5537
+      MINIO_ROOT_PASSWORD: 9e1c40c65a615a5b52f52aeeaf549944ec53acb1dff4a0bf01fb58e969f915c8
     ports:
       - 9000:9000
       - 32765:32765
     expose:
       - 9000
       - 32765
-    volumes:
-      - minio-data-volume:/data:rw
-    command: server --address 0.0.0.0:9000 --console-address 0.0.0.0:32765 /data
+    entrypoint: sh
+    command: -c 'mkdir -p /data/default && /opt/bin/minio server --address 0.0.0.0:9000 --console-address 0.0.0.0:32765 /data'
 
   hasura:
     container_name: hasura
